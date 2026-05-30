@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Foto da Superação — Labirinto Mental</title>
+  <style>
+    :root{
+      --bg:#100914;
+      --panel:#1d1025;
+      --panel2:#2a1835;
+      --text:#fff7fb;
+      --muted:#d7c7df;
+      --pink:#ff4f8b;
+      --gold:#ffd166;
+      --green:#7cf7d4;
+      --line:rgba(255,255,255,.15);
+      --shadow:0 18px 45px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(255,79,139,.25), transparent 30%),
+        radial-gradient(circle at 80% 20%, rgba(124,247,212,.13), transparent 25%),
+        linear-gradient(135deg,#09050c,#170d20 60%,#09050c);
+      color:var(--text);
+      min-height:100vh;
+    }
+    .wrap{width:min(100%,1100px);margin:auto;padding:16px}
+    header{
+      display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;
+    }
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{
+      width:54px;height:54px;border-radius:18px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--pink),var(--gold));
+      box-shadow:0 0 30px rgba(255,79,139,.45);
+      font-size:28px;
+    }
+    h1{margin:0;font-size:clamp(24px,4vw,42px);line-height:1}
+    .sub{color:var(--muted);font-size:14px;margin-top:4px}
+    .pill{
+      padding:9px 12px;border-radius:999px;
+      background:rgba(255,255,255,.08);border:1px solid var(--line);
+      color:var(--muted);font-size:13px;
+    }
+    .grid{
+      display:grid;grid-template-columns:1.1fr .9fr;gap:16px;
+    }
+    @media(max-width:900px){.grid{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}}
+    .card{
+      background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
+    .stage{
+      position:relative;
+      width:100%;
+      aspect-ratio:3/4;
+      min-height:520px;
+      overflow:hidden;
+      border-radius:22px;
+      background:#000;
+      border:1px solid var(--line);
+    }
+    @media(max-width:560px){.stage{min-height:420px}}
+    video, canvas{
+      position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    }
+    #resultCanvas{display:none;background:#111}
+    .boothOverlay{
+      position:absolute;inset:0;pointer-events:none;
+      background:
+        linear-gradient(to bottom, rgba(0,0,0,.12), transparent 30%, rgba(0,0,0,.38)),
+        radial-gradient(circle at 50% 0%, rgba(255,79,139,.20), transparent 45%);
+    }
+    .boothTop{
+      position:absolute;left:6%;right:6%;top:3%;
+      padding:12px 10px;
+      text-align:center;
+      border-radius:18px;
+      background:rgba(29,16,37,.82);
+      border:1px solid rgba(255,255,255,.18);
+      backdrop-filter:blur(6px);
+      font-weight:900;
+      letter-spacing:.5px;
+      text-shadow:0 2px 8px rgba(0,0,0,.6);
+    }
+    .brainFrame{
+      position:absolute;left:5%;right:5%;bottom:7%;
+      min-height:22%;
+      border-radius:28px;
+      background:rgba(16,9,20,.78);
+      border:2px solid rgba(255,79,139,.55);
+      box-shadow:0 0 25px rgba(255,79,139,.25);
+      padding:12px;
+      display:flex;align-items:center;gap:12px;
+      backdrop-filter:blur(7px);
+    }
+    .celebrityBox{
+      width:92px;height:112px;flex:0 0 auto;
+      border-radius:20px;
+      background:linear-gradient(135deg,#57305f,#1d1025);
+      border:2px solid rgba(255,255,255,.25);
+      display:grid;place-items:center;text-align:center;
+      overflow:hidden;
+    }
+    .celebrityBox img{width:100%;height:100%;object-fit:cover}
+    .celebrityBox .emoji{font-size:38px}
+    .quoteText{
+      flex:1;
+      font-weight:900;
+      font-size:clamp(16px,3.2vw,25px);
+      line-height:1.05;
+    }
+    .quoteSmall{display:block;color:var(--green);font-size:13px;margin-top:8px;font-weight:bold}
+    label{display:block;font-weight:bold;color:var(--muted);margin:13px 0 6px}
+    input, select, textarea{
+      width:100%;border:1px solid var(--line);border-radius:14px;
+      padding:13px 14px;
+      background:rgba(255,255,255,.08);
+      color:var(--text);
+      outline:none;
+      font-size:15px;
+    }
+    option{color:#111}
+    textarea{min-height:80px;resize:vertical}
+    button{
+      border:0;border-radius:16px;padding:14px 16px;
+      background:linear-gradient(135deg,var(--pink),var(--gold));
+      color:#170b16;font-weight:900;cursor:pointer;
+      box-shadow:0 12px 24px rgba(255,79,139,.20);
+      transition:.2s;
+      font-size:15px;
+    }
+    button:hover{transform:translateY(-2px)}
+    button.secondary{
+      background:rgba(255,255,255,.08);
+      color:var(--text);
+      border:1px solid var(--line);
+      box-shadow:none;
+    }
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .hint{
+      color:var(--muted);font-size:13px;line-height:1.45;margin-top:12px;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+    }
+    .miniGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(max-width:560px){.miniGrid{grid-template-columns:1fr}}
+    .hidden{display:none!important}
+    .toast{
+      position:fixed;left:50%;bottom:18px;transform:translateX(-50%);
+      background:rgba(0,0,0,.82);color:#fff;
+      padding:12px 16px;border-radius:999px;
+      border:1px solid var(--line);
+      display:none;z-index:999;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">🧠</div>
+        <div>
+          <h1>Foto da Superação</h1>
+          <div class="sub">Labirinto Mental — registre sua mensagem de valorização da vida</div>
+        </div>
+      </div>
+      <div class="pill">Câmera + moldura + frase + salvar</div>
+    </header>
+
+    <section class="grid">
+      <div class="card">
+        <div class="stage" id="stage">
+          <video id="video" autoplay playsinline muted></video>
+          <canvas id="resultCanvas" width="1200" height="1600"></canvas>
+
+          <div class="boothOverlay" id="liveOverlay">
+            <div class="boothTop">LABIRINTO MENTAL • VOCÊ NÃO ESTÁ SOZINHO</div>
+
+            <div class="brainFrame">
+              <div class="celebrityBox" id="liveCelebrity">
+                <div>
+                  <div class="emoji">⭐</div>
+                  <small>Personalidade</small>
+                </div>
+              </div>
+              <div class="quoteText" id="liveQuote">
+                Sua história ainda pode ter novos caminhos.
+                <span class="quoteSmall">#ValorizaçãoDaVida</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="btns">
+          <button onclick="startCamera()">Abrir câmera</button>
+          <button onclick="takePhoto()">Tirar foto</button>
+          <button class="secondary" onclick="downloadPhoto()">Salvar foto</button>
+          <button class="secondary" onclick="resetPreview()">Voltar para câmera</button>
+        </div>
+      </div>
+
+      <aside class="card">
+        <h2>Configurar foto</h2>
+
+        <div class="miniGrid">
+          <div>
+            <label for="personName">Nome do participante</label>
+            <input id="personName" placeholder="Ex.: Ana Clara" oninput="updateOverlay()">
+          </div>
+          <div>
+            <label for="className">Turma</label>
+            <input id="className" placeholder="Ex.: 2ª série" oninput="updateOverlay()">
+          </div>
+        </div>
+
+        <label for="famous">Personalidade inspiradora</label>
+        <select id="famous" onchange="updateOverlay()">
+          <option value="whindersson">Whindersson Nunes — superação emocional</option>
+          <option value="ladygaga">Lady Gaga — coragem e saúde mental</option>
+          <option value="billie">Billie Eilish — juventude e acolhimento</option>
+          <option value="phelps">Michael Phelps — pedir ajuda é força</option>
+          <option value="selena">Selena Gomez — cuidado e esperança</option>
+          <option value="custom">Personalidade enviada pela equipe</option>
+        </select>
+
+        <label for="customImage">Imagem da personalidade / convidado</label>
+        <input id="customImage" type="file" accept="image/*" onchange="loadCustomImage(event)">
+        <div class="hint">
+          Para evitar problema de direito de imagem, o ideal é usar fotos autorizadas, desenhos, caricaturas ou imagens que vocês mesmos prepararem.
+          O aplicativo já funciona com cartões ilustrativos; se quiser foto real, carregue a imagem aqui.
+        </div>
+
+        <label for="quote">Frase de valorização e superação</label>
+        <textarea id="quote" oninput="updateOverlay()">Sua história ainda pode ter novos caminhos.</textarea>
+
+        <label for="theme">Estilo da moldura</label>
+        <select id="theme" onchange="updateOverlay()">
+          <option value="pink">Cérebro rosa — Labirinto Mental</option>
+          <option value="gold">Superação dourada</option>
+          <option value="green">Rede de apoio verde</option>
+        </select>
+
+        <div class="btns">
+          <button class="secondary" onclick="randomQuote()">Sortear frase</button>
+          <button class="secondary" onclick="flipCamera()">Virar câmera</button>
+        </div>
+
+        <div class="hint">
+          Funciona melhor no celular usando HTTPS ou GitHub Pages. Em computador, use uma webcam. Depois de tirar a foto, aperte “Salvar foto”.
+        </div>
+      </aside>
+    </section>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("resultCanvas");
+    const ctx = canvas.getContext("2d");
+    let stream = null;
+    let facingMode = "user";
+    let currentImage = null;
+    let photoReady = false;
+
+    const famousData = {
+      whindersson: { label:"Whindersson Nunes", emoji:"🎤" },
+      ladygaga: { label:"Lady Gaga", emoji:"🎶" },
+      billie: { label:"Billie Eilish", emoji:"🎧" },
+      phelps: { label:"Michael Phelps", emoji:"🏊" },
+      selena: { label:"Selena Gomez", emoji:"🌟" },
+      custom: { label:"Personalidade", emoji:"⭐" }
+    };
+
+    const quotes = [
+      "Você não precisa vencer sozinho.",
+      "Pedir ajuda é um ato de coragem.",
+      "Sua vida tem valor, mesmo nos dias difíceis.",
+      "A dor não define o fim da sua história.",
+      "Existe saída quando existe rede de apoio.",
+      "Você é maior que o momento difícil.",
+      "Respire. Recomeçar também é vencer.",
+      "Ninguém precisa carregar tudo sozinho."
+    ];
+
+    async function startCamera(){
+      try{
+        if(stream){ stream.getTracks().forEach(t=>t.stop()); }
+        stream = await navigator.mediaDevices.getUserMedia({
+          video:{ facingMode: facingMode, width:{ideal:1280}, height:{ideal:1600} },
+          audio:false
+        });
+        video.srcObject = stream;
+        showToast("Câmera aberta.");
+      }catch(e){
+        alert("Não foi possível abrir a câmera. Verifique a permissão do navegador.");
+      }
+    }
+
+    function flipCamera(){
+      facingMode = facingMode === "user" ? "environment" : "user";
+      startCamera();
+    }
+
+    function updateOverlay(){
+      const famous = document.getElementById("famous").value;
+      const data = famousData[famous] || famousData.custom;
+      const quote = document.getElementById("quote").value.trim() || "Você não está sozinho.";
+      const name = document.getElementById("personName").value.trim();
+      const turma = document.getElementById("className").value.trim();
+
+      const box = document.getElementById("liveCelebrity");
+      if(currentImage){
+        box.innerHTML = `<img src="${currentImage}" alt="Personalidade">`;
+      }else{
+        box.innerHTML = `<div><div class="emoji">${data.emoji}</div><small>${data.label}</small></div>`;
+      }
+
+      document.getElementById("liveQuote").innerHTML = `
+        ${quote}
+        <span class="quoteSmall">${name ? name : "Participante"} ${turma ? "• " + turma : ""} • #VocêNãoEstáSozinho</span>
+      `;
+
+      const theme = document.getElementById("theme").value;
+      const frame = document.querySelector(".brainFrame");
+      if(theme === "gold"){
+        frame.style.borderColor = "rgba(255,209,102,.75)";
+        frame.style.boxShadow = "0 0 25px rgba(255,209,102,.28)";
+      }else if(theme === "green"){
+        frame.style.borderColor = "rgba(124,247,212,.75)";
+        frame.style.boxShadow = "0 0 25px rgba(124,247,212,.25)";
+      }else{
+        frame.style.borderColor = "rgba(255,79,139,.55)";
+        frame.style.boxShadow = "0 0 25px rgba(255,79,139,.25)";
+      }
+    }
+
+    function loadCustomImage(event){
+      const file = event.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        currentImage = e.target.result;
+        document.getElementById("famous").value = "custom";
+        updateOverlay();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function randomQuote(){
+      document.getElementById("quote").value = quotes[Math.floor(Math.random()*quotes.length)];
+      updateOverlay();
+    }
+
+    function drawRoundedRect(ctx, x, y, w, h, r){
+      ctx.beginPath();
+      ctx.moveTo(x+r,y);
+      ctx.lineTo(x+w-r,y);
+      ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+      ctx.lineTo(x+w,y+h-r);
+      ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+      ctx.lineTo(x+r,y+h);
+      ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+      ctx.lineTo(x,y+r);
+      ctx.quadraticCurveTo(x,y,x+r,y);
+      ctx.closePath();
+    }
+
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight){
+      const words = text.split(" ");
+      let line = "";
+      for(let n=0;n<words.length;n++){
+        const testLine = line + words[n] + " ";
+        const metrics = ctx.measureText(testLine);
+        if(metrics.width > maxWidth && n > 0){
+          ctx.fillText(line, x, y);
+          line = words[n] + " ";
+          y += lineHeight;
+        }else{
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, x, y);
+      return y;
+    }
+
+    async function takePhoto(){
+      if(!video.srcObject){
+        alert("Abra a câmera primeiro.");
+        return;
+      }
+
+      const W = 1200, H = 1600;
+      canvas.width = W;
+      canvas.height = H;
+
+      const vw = video.videoWidth || 1280;
+      const vh = video.videoHeight || 720;
+      const scale = Math.max(W/vw, H/vh);
+      const sw = W/scale;
+      const sh = H/scale;
+      const sx = (vw - sw)/2;
+      const sy = (vh - sh)/2;
+
+      ctx.drawImage(video, sx, sy, sw, sh, 0, 0, W, H);
+
+      // escurecimento leve
+      const grad = ctx.createLinearGradient(0,0,0,H);
+      grad.addColorStop(0,"rgba(0,0,0,.15)");
+      grad.addColorStop(.55,"rgba(0,0,0,.02)");
+      grad.addColorStop(1,"rgba(0,0,0,.55)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0,0,W,H);
+
+      // Cabeçalho
+      drawRoundedRect(ctx, 70, 45, W-140, 95, 28);
+      ctx.fillStyle = "rgba(29,16,37,.88)";
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,.28)";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 38px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("LABIRINTO MENTAL", W/2, 87);
+      ctx.font = "bold 25px Arial";
+      ctx.fillStyle = "#7cf7d4";
+      ctx.fillText("VOCÊ NÃO ESTÁ SOZINHO", W/2, 120);
+
+      // Moldura inferior
+      drawRoundedRect(ctx, 55, H-395, W-110, 310, 35);
+      const theme = document.getElementById("theme").value;
+      ctx.fillStyle = "rgba(16,9,20,.88)";
+      ctx.fill();
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = theme === "gold" ? "#ffd166" : theme === "green" ? "#7cf7d4" : "#ff4f8b";
+      ctx.stroke();
+
+      // Caixa personalidade
+      drawRoundedRect(ctx, 95, H-355, 230, 240, 30);
+      ctx.fillStyle = "#2a1835";
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,.35)";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      const famous = famousData[document.getElementById("famous").value] || famousData.custom;
+      if(currentImage){
+        const img = new Image();
+        img.onload = () => {
+          ctx.save();
+          drawRoundedRect(ctx, 95, H-355, 230, 240, 30);
+          ctx.clip();
+          ctx.drawImage(img, 95, H-355, 230, 240);
+          ctx.restore();
+          drawTextLayer(W,H,famous);
+          finishPhoto();
+        };
+        img.src = currentImage;
+        return;
+      }else{
+        ctx.font = "80px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(famous.emoji, 210, H-245);
+        ctx.font = "bold 26px Arial";
+        ctx.fillStyle = "#ffffff";
+        wrapText(ctx, famous.label, 210, H-180, 180, 30);
+      }
+
+      drawTextLayer(W,H,famous);
+      finishPhoto();
+    }
+
+    function drawTextLayer(W,H,famous){
+      const quote = document.getElementById("quote").value.trim() || "Você não está sozinho.";
+      const name = document.getElementById("personName").value.trim() || "Participante";
+      const turma = document.getElementById("className").value.trim();
+
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 48px Arial";
+      wrapText(ctx, quote, 360, H-310, 735, 56);
+
+      ctx.font = "bold 26px Arial";
+      ctx.fillStyle = "#7cf7d4";
+      ctx.fillText(`${name}${turma ? " • " + turma : ""}`, 360, H-150);
+
+      ctx.font = "bold 22px Arial";
+      ctx.fillStyle = "#ffd166";
+      ctx.fillText("#ValorizaçãoDaVida  #VocêNãoEstáSozinho", 360, H-116);
+    }
+
+    function finishPhoto(){
+      photoReady = true;
+      canvas.style.display = "block";
+      video.style.display = "none";
+      document.getElementById("liveOverlay").style.display = "none";
+      showToast("Foto gerada. Agora aperte Salvar foto.");
+    }
+
+    function resetPreview(){
+      canvas.style.display = "none";
+      video.style.display = "block";
+      document.getElementById("liveOverlay").style.display = "block";
+      photoReady = false;
+    }
+
+    function downloadPhoto(){
+      if(!photoReady){
+        alert("Tire a foto antes de salvar.");
+        return;
+      }
+      const nome = (document.getElementById("personName").value.trim() || "participante")
+        .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+        .replace(/[^a-zA-Z0-9_-]/g,"_");
+
+      const a = document.createElement("a");
+      a.download = `foto_superacao_${nome}.png`;
+      a.href = canvas.toDataURL("image/png");
+      a.click();
+      showToast("Foto salva/baixada.");
+    }
+
+    function showToast(msg){
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.style.display = "block";
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=> t.style.display = "none", 2300);
+    }
+
+    updateOverlay();
+  </script>
+</body>
+</html>
